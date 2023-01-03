@@ -6,17 +6,8 @@ class Hand {
     this.wildCardColor = null;
     this.isUno = false;
     this.cardMap = new Map();
-    //this.dealer = false;
-    //this.currPlayer = false;
   }
 
-  // isDealer(dealer = false) {
-  //   this.dealer = dealer;
-  // }
-
-  // isCurrPlayer(player = false) {
-  //   this.currPlayer = player;
-  // }
   setCardMap() {
     for (const card of this.cards) {
       if (card.suite === "*") {
@@ -60,7 +51,6 @@ class Hand {
   }
 
   drawCard() {
-    //return this.cards.splice(0, 1);
     return this.cards.pop();
   }
 }
