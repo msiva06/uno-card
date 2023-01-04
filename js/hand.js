@@ -5,10 +5,11 @@ class Hand {
     this.cards = cards;
     this.wildCardColor = null;
     this.isUno = false;
-    this.cardMap = new Map();
+    this.cardMap = null;
   }
 
   setCardMap() {
+    this.cardMap = new Map();
     for (const card of this.cards) {
       if (card.suite === "*") {
         if (

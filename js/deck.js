@@ -34,10 +34,10 @@ class Deck {
         i++;
       }
     }
-    // for (let i = 0; i < 4; i++) {
-    //   this.cards.push(new Wild());
-    //   this.cards.push(new WildPlusFour());
-    // }
+    for (let i = 0; i < 4; i++) {
+      this.cards.push(new Wild());
+      //   this.cards.push(new WildPlusFour());
+    }
     return this.cards;
   }
 

@@ -77,7 +77,7 @@ class Game {
     this.currPlayer = this.nextplayer;
   }
 
-  wildCardActionCard() {
+  wildCardActionCard(wildCard) {
     const colors = ["red", "blue", "green", "yellow"];
     let choseRandomColorIndex = Math.random() * (3 - 0 + 1); // Math.random() * (upper_bound-lower_bound + 1);
     let choseRandomColor = colors[choseRandomColorIndex];
@@ -97,9 +97,15 @@ class Game {
         break;
       }
     }
-    this.findNextPlayer();
-    this.nextplayer.wildCardColor = this.currPlayer.wildCard;
-    this.currPlayer.wildCard = null;
+    this.discardPile.push(wildCard);
+    if (this.currPlayer.wildCardColor === choseRandomColor) {
+      const nextPlayerWildCardColor = this.currPlayer.wildCardColor;
+      this.currPlayer.wildCardColor = null;
+      this.findNextPlayer();
+      this.nextplayer.wildCardColor = nextPlayerWildCardColor;
+    } else {
+      this.findNextPlayer();
+    }
     this.currPlayer = this.nextplayer;
   }
 
@@ -118,9 +124,11 @@ class Game {
       case "plustwo":
         this.plusTwoActionCard();
         break;
-      case "wild":
-        this.wildCardActionCard();
+      case "wild": {
+        const wildCard = this.discardPile.pop();
+        this.wildCardActionCard(wildCard);
         break;
+      }
       case "wildplusfour": {
         if (this.discardPile.length === 1) {
           this.deck.cards.push(this.discardPile.pop());
@@ -143,16 +151,16 @@ class Game {
   }
   playGame() {
     //debugger;
-    //find dealer
+    // find dealer
     const dealerIndex = this.hands.indexOf(this.dealer);
 
-    //find current player
+    // find current player
     this.currPlayer = this.hands[(dealerIndex + 1) % 4];
 
-    //move one card to discard pile
+    // move one card to discard pile
     this.discardPile.push(this.deck.draw());
 
-    //check if current player has cards and didnt call uno
+    // check if current player has cards and didnt call uno
     while (this.currPlayer.cards.length > 0 && !this.currPlayer.isUNO) {
       let discardTop = this.discardPile[this.discardPile.length - 1];
       console.log("Discard Card:", discardTop);
@@ -165,7 +173,6 @@ class Game {
       this.currPlayer.setCardMap();
       if (typeof discardTop.rank !== "number") {
         this.actionCardfunction(discardTop);
-        //this.discardPile.pop();
         if (this.discardPile.length === 0) {
           this.deck.shuffleCards();
           this.discardPile.push(this.deck.draw());
@@ -179,11 +186,19 @@ class Game {
           this.findNextPlayer();
           this.currPlayer = this.nextplayer;
         } else {
-          // wildcard check
-          const matchedCardIndex = this.currPlayer.cards.findIndex(
-            (card) =>
-              card.suit === discardTop.suit || card.rank === discardTop.rank
-          );
+          let matchedCardIndex;
+          if (this.currPlayer.wildCardColor !== null) {
+            matchedCardIndex = this.currPlayer.cards.findIndex(
+              (card) => card.suit === this.currPlayer.wildCardColor
+            );
+            this.currPlayer.wildCardColor = null;
+          } else {
+            matchedCardIndex = this.currPlayer.cards.findIndex(
+              (card) =>
+                card.suit === discardTop.suit || card.rank === discardTop.rank
+            );
+          }
+
           if (matchedCardIndex !== -1) {
             const [matchedCard] = this.currPlayer.cards.splice(
               matchedCardIndex,
@@ -196,7 +211,6 @@ class Game {
                   `CurrPlayer: ${this.currPlayer.name} placed reverse card`
                 );
                 this.actionCardfunction(matchedCard);
-                //this.deck.cards.push(this.discardPile.pop());
               } else this.findNextPlayer();
             }
           } else if (this.currPlayer.cardMap.get("*") > 0) {
@@ -205,8 +219,8 @@ class Game {
               (card) => card.suit === "*"
             );
             const [wildCard] = this.currPlayer.cards.splice(wildCardIndex, 1);
-            this.discardPile.push(wildCard);
-            this.wildCardActionCard();
+            //this.discardPile.push(wildCard);
+            this.wildCardActionCard(wildCard);
           } else {
             let drawCards = [];
             if (this.deck.cards.length === 0) {
@@ -239,7 +253,6 @@ class Game {
                 `CurrPlayer: ${this.currPlayer.name} placed reverse card`
               );
               this.actionCardfunction(matchedCard);
-              //this.deck.cards.push(this.discardPile.pop());
             } else this.findNextPlayer();
           }
         }
